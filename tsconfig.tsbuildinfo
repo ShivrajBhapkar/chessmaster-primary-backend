@@ -1,1 +1,1 @@
-{"root":["./src/consts.ts","./src/index.ts","./src/passport.ts","./src/db/index.ts","./src/router/auth.ts","./src/router/v1.ts"],"version":"5.7.2"}
+{"root":["./src/consts.ts","./src/index.ts","./src/passport.ts","./src/db/index.ts","./src/router/auth.ts","./src/router/v1.ts"],"version":"5.7.3"}

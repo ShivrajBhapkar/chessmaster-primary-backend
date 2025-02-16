@@ -14,12 +14,13 @@ const app = express();
 dotenv.config();
 app.use(express.json());
 app.use(cookieParser());
+console.log("Called")
 app.use(
     session({
         secret: process.env.COOKIE_SECRET || "keyboard cat",
         resave: false,
         saveUninitialized: false,
-        cookie: { secure: false, maxAge: COOKIE_MAX_AGE },
+        cookie: { secure: true, maxAge: COOKIE_MAX_AGE, sameSite: "none" },
     })
 );
 
@@ -29,7 +30,7 @@ app.use(passport.authenticate("session"));
 
 app.use(
     cors({
-        origin: "http://localhost:5173", // Frontend URL
+        origin: "http://chesspro.xyz", // Frontend URL
         credentials: true, // Allow cookies to be sent
     })
 );

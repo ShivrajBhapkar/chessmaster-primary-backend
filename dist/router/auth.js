@@ -20,18 +20,18 @@ const db_1 = require("../db");
 const uuid_1 = require("uuid");
 const consts_1 = require("../consts");
 const router = (0, express_1.Router)();
-const CLIENT_URL = (_a = process.env.AUTH_REDIRECT_URL) !== null && _a !== void 0 ? _a : 'http://localhost:5173/game/random';
-const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
+const CLIENT_URL = (_a = process.env.AUTH_REDIRECT_URL) !== null && _a !== void 0 ? _a : "http://chesspro.xyz/game/random";
+const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key";
 // this route is to be hit when the user wants to login as a guest
-router.post('/guest', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/guest", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const bodyData = req.body;
-    let guestUUID = 'guest-' + (0, uuid_1.v4)();
+    let guestUUID = "guest-" + (0, uuid_1.v4)();
     const user = yield db_1.db.user.create({
         data: {
             username: guestUUID,
-            email: guestUUID + '@chess100x.com',
+            email: guestUUID + "@chess100x.com",
             name: bodyData.name || guestUUID,
-            provider: 'GUEST',
+            provider: "GUEST",
         },
     });
     const token = jsonwebtoken_1.default.sign({ userId: user.id, name: user.name, isGuest: true }, JWT_SECRET);
@@ -41,10 +41,11 @@ router.post('/guest', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         token: token,
         isGuest: true,
     };
-    res.cookie('guest', token, { maxAge: consts_1.COOKIE_MAX_AGE });
+    res.cookie("guest", token, { maxAge: consts_1.COOKIE_MAX_AGE });
     res.json(UserDetails);
 }));
-router.get('/refresh', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/refresh", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("Cookies", req.user);
     if (req.user) {
         const user = req.user;
         // Token is issued so it can be shared b/w HTTP and ws server
@@ -62,6 +63,7 @@ router.get('/refresh', (req, res) => __awaiter(void 0, void 0, void 0, function*
         });
     }
     else if (req.cookies && req.cookies.guest) {
+        console.log("inside if");
         const decoded = jsonwebtoken_1.default.verify(req.cookies.guest, JWT_SECRET);
         const token = jsonwebtoken_1.default.sign({ userId: decoded.userId, name: decoded.name, isGuest: true }, JWT_SECRET);
         let User = {
@@ -70,39 +72,44 @@ router.get('/refresh', (req, res) => __awaiter(void 0, void 0, void 0, function*
             token: token,
             isGuest: true,
         };
-        res.cookie('guest', token, { maxAge: consts_1.COOKIE_MAX_AGE });
+        res.cookie("guest", token, { maxAge: consts_1.COOKIE_MAX_AGE });
         res.json(User);
     }
     else {
-        res.status(401).json({ success: false, message: 'Unauthorized' });
+        res.status(401).json({ success: false, message: "Unauthorized" });
     }
 }));
-router.get('/login/failed', (req, res) => {
-    res.status(401).json({ success: false, message: 'failure' });
+router.get("/login/failed", (req, res) => {
+    res.status(401).json({ success: false, message: "failure" });
 });
-router.get('/logout', (req, res) => {
-    res.clearCookie('guest');
+router.get("/logout", (req, res) => {
+    res.clearCookie("guest");
     req.logout((err) => {
         if (err) {
-            console.error('Error logging out:', err);
-            res.status(500).json({ error: 'Failed to log out' });
+            console.error("Error logging out:", err);
+            res.status(500).json({ error: "Failed to log out" });
         }
         else {
-            res.clearCookie('jwt');
-            res.redirect('http://localhost:5173/');
+            res.clearCookie("jwt");
+            res.redirect("http://chesspro.xyz/");
         }
     });
 });
-router.get('/google', passport_1.default.authenticate('google', { scope: ['profile', 'email'] }));
+router.get("/google", passport_1.default.authenticate("google", { scope: ["profile", "email"] }));
 router.get("/google/callback", passport_1.default.authenticate("google"), (req, res) => {
     const user = req.user; // Replace with your user type
     const token = jsonwebtoken_1.default.sign({ userId: user.id, name: user.name }, JWT_SECRET);
-    res.cookie("jwt", token, { httpOnly: true });
+    res.cookie("jwt", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: consts_1.COOKIE_MAX_AGE,
+    });
     res.redirect(CLIENT_URL);
 });
-router.get('/github', passport_1.default.authenticate('github', { scope: ['read:user', 'user:email'] }));
-router.get('/github/callback', passport_1.default.authenticate('github', {
+router.get("/github", passport_1.default.authenticate("github", { scope: ["read:user", "user:email"] }));
+router.get("/github/callback", passport_1.default.authenticate("github", {
     successRedirect: CLIENT_URL,
-    failureRedirect: '/login/failed',
+    failureRedirect: "/login/failed",
 }));
 exports.default = router;
