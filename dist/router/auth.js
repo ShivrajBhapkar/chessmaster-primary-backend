@@ -45,7 +45,6 @@ router.post("/guest", (req, res) => __awaiter(void 0, void 0, void 0, function* 
     res.json(UserDetails);
 }));
 router.get("/refresh", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Cookies", req.user);
     if (req.user) {
         const user = req.user;
         // Token is issued so it can be shared b/w HTTP and ws server
@@ -63,7 +62,6 @@ router.get("/refresh", (req, res) => __awaiter(void 0, void 0, void 0, function*
         });
     }
     else if (req.cookies && req.cookies.guest) {
-        console.log("inside if");
         const decoded = jsonwebtoken_1.default.verify(req.cookies.guest, JWT_SECRET);
         const token = jsonwebtoken_1.default.sign({ userId: decoded.userId, name: decoded.name, isGuest: true }, JWT_SECRET);
         let User = {
@@ -91,22 +89,15 @@ router.get("/logout", (req, res) => {
         }
         else {
             res.clearCookie("jwt");
-            res.redirect("http://chesspro.xyz/");
+            res.redirect("http://localhost:5173/");
         }
     });
 });
 router.get("/google", passport_1.default.authenticate("google", { scope: ["profile", "email"] }));
-router.get("/google/callback", passport_1.default.authenticate("google"), (req, res) => {
-    const user = req.user; // Replace with your user type
-    const token = jsonwebtoken_1.default.sign({ userId: user.id, name: user.name }, JWT_SECRET);
-    res.cookie("jwt", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: consts_1.COOKIE_MAX_AGE,
-    });
-    res.redirect(CLIENT_URL);
-});
+router.get("/google/callback", passport_1.default.authenticate("google", {
+    successRedirect: CLIENT_URL,
+    failureRedirect: "/login/failed",
+}));
 router.get("/github", passport_1.default.authenticate("github", { scope: ["read:user", "user:email"] }));
 router.get("/github/callback", passport_1.default.authenticate("github", {
     successRedirect: CLIENT_URL,

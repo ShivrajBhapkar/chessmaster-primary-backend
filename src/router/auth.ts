@@ -52,7 +52,6 @@ router.post("/guest", async (req: Request, res: Response) => {
 });
 
 router.get("/refresh", async (req: Request, res: Response) => {
-   console.log("Cookies" , req.user)
     if (req.user) {
         const user = req.user as UserDetails;
 
@@ -75,7 +74,6 @@ router.get("/refresh", async (req: Request, res: Response) => {
             name: userDb?.name,
         });
     } else if (req.cookies && req.cookies.guest) {
-        console.log("inside if")
         const decoded = jwt.verify(
             req.cookies.guest,
             JWT_SECRET
@@ -109,7 +107,7 @@ router.get("/logout", (req: Request, res: Response) => {
             res.status(500).json({ error: "Failed to log out" });
         } else {
             res.clearCookie("jwt");
-            res.redirect("http://chesspro.xyz/");
+            res.redirect("http://localhost:5173/");
         }
     });
 });
@@ -119,17 +117,13 @@ router.get(
     passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-router.get("/google/callback", passport.authenticate("google"), (req, res) => {
-    const user = req.user as UserDetails; // Replace with your user type
-    const token = jwt.sign({ userId: user.id, name: user.name }, JWT_SECRET);
-    res.cookie("jwt", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: COOKIE_MAX_AGE,
-    });
-    res.redirect(CLIENT_URL);
-});
+router.get(
+    "/google/callback",
+    passport.authenticate("google", {
+        successRedirect: CLIENT_URL,
+        failureRedirect: "/login/failed",
+    })
+);
 
 router.get(
     "/github",

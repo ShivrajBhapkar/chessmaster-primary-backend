@@ -14,13 +14,12 @@ const app = express();
 dotenv.config();
 app.use(express.json());
 app.use(cookieParser());
-console.log("Called")
 app.use(
     session({
         secret: process.env.COOKIE_SECRET || "keyboard cat",
         resave: false,
         saveUninitialized: false,
-        cookie: { secure: true, maxAge: COOKIE_MAX_AGE, sameSite: "none" },
+        cookie: { secure: false, maxAge: COOKIE_MAX_AGE,domain:'chesspro.xyz' },
     })
 );
 
@@ -28,10 +27,15 @@ initPassport();
 app.use(passport.initialize());
 app.use(passport.authenticate("session"));
 
+const allowedHosts = process.env.ALLOWED_HOSTS
+    ? process.env.ALLOWED_HOSTS.split(",")
+    : [];
+
 app.use(
     cors({
-        origin: "http://chesspro.xyz", // Frontend URL
-        credentials: true, // Allow cookies to be sent
+        origin: allowedHosts,
+        methods: "GET,POST,PUT,DELETE",
+        credentials: true,
     })
 );
 
