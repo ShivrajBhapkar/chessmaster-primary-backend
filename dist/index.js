@@ -21,7 +21,7 @@ app.use((0, express_session_1.default)({
     secret: process.env.COOKIE_SECRET || "keyboard cat",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, maxAge: consts_1.COOKIE_MAX_AGE, domain: 'chesspro.xyz' },
+    cookie: { secure: false, maxAge: consts_1.COOKIE_MAX_AGE, sameSite: 'lax', path: "/" },
 }));
 (0, passport_1.initPassport)();
 app.use(passport_2.default.initialize());
@@ -30,9 +30,11 @@ const allowedHosts = process.env.ALLOWED_HOSTS
     ? process.env.ALLOWED_HOSTS.split(",")
     : [];
 app.use((0, cors_1.default)({
-    origin: allowedHosts,
+    origin: "*",
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
+    exposedHeaders: ["Set-Cookie"],
+    preflightContinue: true,
 }));
 app.use("/auth", auth_1.default);
 app.use("/v1", v1_1.default);

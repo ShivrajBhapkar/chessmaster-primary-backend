@@ -19,7 +19,7 @@ app.use(
         secret: process.env.COOKIE_SECRET || "keyboard cat",
         resave: false,
         saveUninitialized: false,
-        cookie: { secure: false, maxAge: COOKIE_MAX_AGE,domain:'chesspro.xyz' },
+        cookie: { secure: false, maxAge: COOKIE_MAX_AGE, sameSite: 'lax' ,path:"/"},
     })
 );
 
@@ -33,9 +33,11 @@ const allowedHosts = process.env.ALLOWED_HOSTS
 
 app.use(
     cors({
-        origin: allowedHosts,
+        origin: "*",
         methods: "GET,POST,PUT,DELETE",
         credentials: true,
+        exposedHeaders: ["Set-Cookie"],
+        preflightContinue: true,
     })
 );
 

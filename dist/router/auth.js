@@ -20,7 +20,7 @@ const db_1 = require("../db");
 const uuid_1 = require("uuid");
 const consts_1 = require("../consts");
 const router = (0, express_1.Router)();
-const CLIENT_URL = (_a = process.env.AUTH_REDIRECT_URL) !== null && _a !== void 0 ? _a : "http://chesspro.xyz/game/random";
+const CLIENT_URL = (_a = process.env.AUTH_REDIRECT_URL) !== null && _a !== void 0 ? _a : "http://localhost:5173/game/random";
 const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key";
 // this route is to be hit when the user wants to login as a guest
 router.post("/guest", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
