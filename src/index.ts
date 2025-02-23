@@ -33,7 +33,7 @@ const allowedHosts = process.env.ALLOWED_HOSTS
 
 app.use(
     cors({
-        origin: "*",
+        origin: true,
         methods: "GET,POST,PUT,DELETE",
         credentials: true,
         exposedHeaders: ["Set-Cookie"],
